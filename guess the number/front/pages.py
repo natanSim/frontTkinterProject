@@ -1,5 +1,15 @@
 from tkinter import *
 
+def get_entry_text(window):
+    for element in window.winfo_children():
+        if type(element) is Frame:
+            for frame_element in element.winfo_children():
+                if type(frame_element) is Entry:
+                    print(f'frame_element.get() = {frame_element.get()}')
+                    return frame_element.get()
+
+    return None
+
 
 def clear_frame_from_window(window):
     for element in window.winfo_children():
@@ -18,12 +28,26 @@ def open_first_page(window):
     text_box_of_how_many_players = Entry(master=window_frame)
     text_box_of_how_many_players.place(x=185, y=200)
 
-    button_continue = Button(master=window_frame, text="continue",  font=('Helvetica', 12), command=lambda: open_second_page(window))
+    button_continue = Button(master=window_frame, text="continue",  font=('Helvetica', 12),
+                             command=lambda: open_second_page(window))
     button_continue.place(x=215, y=400)
 
     window_frame.place(x=0, y=80)
 
+
 def open_second_page(window):
+
+    entry_text = get_entry_text(window)
+    if entry_text == '' or entry_text is None:
+        print("Stay as you are")
+        return
+
+    if entry_text.isdigit() == False:
+        print("Only numbers!!!")
+        return
+
+    # TODO: limit amount of players to 5
+
     clear_frame_from_window(window)
 
     window_frame = Frame(master=window, width=500, height=500)
@@ -39,7 +63,11 @@ def open_second_page(window):
 
     window_frame.place(x=0, y=80)
 
+
 def open_third_page(window):
+
+
+
     clear_frame_from_window(window)
     window_frame = Frame(master=window, width=500, height=500)
 
@@ -81,6 +109,7 @@ def open_page_fourth(window):
     button_exit.place(x=225, y=480)
 
     window_frame.place(x=0, y=60)
+
 
 def close_window(window):
     window.destroy()

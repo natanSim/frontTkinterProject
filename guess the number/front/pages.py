@@ -1,5 +1,6 @@
 from tkinter import *
 
+
 def get_entry_text(window):
     for element in window.winfo_children():
         if type(element) is Frame:
@@ -46,7 +47,9 @@ def open_second_page(window):
         print("Only numbers!!!")
         return
 
-    # TODO: limit amount of players to 5
+    if int(entry_text) > 5 or int(entry_text) < 1:
+        print("Up to 5 players are allowed")
+        return
 
     clear_frame_from_window(window)
 
@@ -66,7 +69,14 @@ def open_second_page(window):
 
 def open_third_page(window):
 
+    entry_text = get_entry_text(window)
+    if entry_text == '' or entry_text is None:
+        print("Stay as you are")
+        return
 
+    if entry_text.isdigit() == True :
+        print("Enter a username without numbers")
+        return
 
     clear_frame_from_window(window)
     window_frame = Frame(master=window, width=500, height=500)
@@ -82,19 +92,32 @@ def open_third_page(window):
     label_amount_of_guesses.place(x=370, y=70)
     # endregion player details
 
-    label_of_insert_number = Label(master=window, text="Insert number from 1 - 100:", font=('Helvetica', 22))
-    label_of_insert_number.place(x=75, y=200)
+    label_of_insert_number = Label(master=window_frame, text="Insert number from 1 - 100:", font=('Helvetica', 22))
+    label_of_insert_number.place(x=75, y=130)
 
-    text_box_of_number = Entry(master=window)
-    text_box_of_number.place(x=185, y=270)
+    text_box_of_number = Entry(master=window_frame)
+    text_box_of_number.place(x=185, y=200)
 
-    button_continue = Button(master=window, text="continue", font=('Helvetica', 12), command=lambda: open_page_fourth(window))
-    button_continue.place(x=215, y=480)
+    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12), command=lambda: open_page_fourth(window))
+    button_continue.place(x=215, y=400)
 
     window_frame.place(x=0, y=80)
 
 
 def open_page_fourth(window):
+    entry_text = get_entry_text(window)
+    if entry_text == '' or entry_text is None:
+        print("Stay as you are")
+        return
+
+    if entry_text.isdigit() == False:
+        print("Only numbers!!!")
+        return
+
+    if int(entry_text) > 100 or int(entry_text) < 1 :
+        print("Only numbers from 1 to 100 !!!")
+        return
+
     clear_frame_from_window(window)
 
     window_frame = Frame(master=window, width=500, height=500)

@@ -20,6 +20,104 @@ def clear_frame_from_window(window):
     return window
 
 
+def is_entry_empty(entry_text):
+    return entry_text == '' or entry_text is None
+
+
+def is_number_in_range(number, minimum, maximum):
+    return minimum <= number <= maximum
+
+
+def contains_number(text):
+    for i in text:
+        if i.isdigit():
+            return True
+    return False
+
+
+def is_ready_to_next_page(window, current_window_index):
+
+    if current_window_index == 1:
+
+        entry_text = get_entry_text(window)
+
+        if is_entry_empty(entry_text):
+            print("Stay as you are")
+            return False
+
+        if not entry_text.isdigit():
+            print("Only numbers!!!")
+            return False
+
+        if not is_number_in_range(int(entry_text), 1, 5):
+            print("Up to 5 players are allowed")
+            return False
+
+        clear_frame_from_window(window)
+
+        return True
+
+    elif current_window_index == 2:
+        entry_text = get_entry_text(window)
+
+        if is_entry_empty(entry_text):
+            print("Stay as you are")
+            return False
+
+        if contains_number(entry_text):
+            print("Enter a username without numbers")
+            return False
+
+        clear_frame_from_window(window)
+
+        return True
+
+    elif current_window_index == 3:
+        entry_text = get_entry_text(window)
+
+        if is_entry_empty(entry_text):
+            print("Stay as you are")
+            return False
+
+        if not entry_text.isdigit():
+            print("Only numbers!!!")
+            return False
+
+        if not is_number_in_range(int(entry_text), 1, 100):
+            print("Up to 5 players are allowed")
+            return False
+
+        clear_frame_from_window(window)
+
+        return True
+
+    elif current_window_index == 4:
+        close_window(window)
+
+    else:
+        return f"Natan fix that problem there is no exist page here"
+
+    # TODO: Create validation and rules to move to the next page
+
+
+def open_next_page(window, current_window_index):
+    if current_window_index == 1 and is_ready_to_next_page(window, 1):
+        clear_frame_from_window(window)
+        open_second_page(window)
+
+    elif current_window_index == 2 and is_ready_to_next_page(window, 2):
+        clear_frame_from_window(window)
+        open_third_page(window)
+
+    elif current_window_index == 3 and is_ready_to_next_page(window, 3):
+        clear_frame_from_window(window)
+        open_fourth_page(window)
+
+    elif current_window_index == 4 and is_ready_to_next_page(window, 4):
+        clear_frame_from_window(window)
+        close_window(window)
+
+
 def open_first_page(window):
     window_frame = Frame(master=window, width=500, height=500)
 
@@ -29,30 +127,14 @@ def open_first_page(window):
     text_box_of_how_many_players = Entry(master=window_frame)
     text_box_of_how_many_players.place(x=185, y=200)
 
-    button_continue = Button(master=window_frame, text="continue",  font=('Helvetica', 12),
-                             command=lambda: open_second_page(window))
+    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12),
+                             command=lambda: open_next_page(window, 1))
     button_continue.place(x=215, y=400)
 
     window_frame.place(x=0, y=80)
 
 
 def open_second_page(window):
-
-    entry_text = get_entry_text(window)
-    if entry_text == '' or entry_text is None:
-        print("Stay as you are")
-        return
-
-    if entry_text.isdigit() == False:
-        print("Only numbers!!!")
-        return
-
-    if int(entry_text) > 5 or int(entry_text) < 1:
-        print("Up to 5 players are allowed")
-        return
-
-    clear_frame_from_window(window)
-
     window_frame = Frame(master=window, width=500, height=500)
 
     label_of_player_name = Label(master=window_frame, text="Insert your full name: ", font=('Helvetica', 22))
@@ -61,24 +143,14 @@ def open_second_page(window):
     text_box_of_player_name = Entry(master=window_frame)
     text_box_of_player_name.place(x=185, y=200)
 
-    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12), command=lambda: open_third_page(window))
+    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12),
+                             command=lambda: open_next_page(window, 2))
     button_continue.place(x=215, y=400)
 
     window_frame.place(x=0, y=80)
 
 
 def open_third_page(window):
-
-    entry_text = get_entry_text(window)
-    if entry_text == '' or entry_text is None:
-        print("Stay as you are")
-        return
-
-    if entry_text.isdigit() == True :
-        print("Enter a username without numbers")
-        return
-
-    clear_frame_from_window(window)
     window_frame = Frame(master=window, width=500, height=500)
 
     # region player details
@@ -98,28 +170,14 @@ def open_third_page(window):
     text_box_of_number = Entry(master=window_frame)
     text_box_of_number.place(x=185, y=200)
 
-    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12), command=lambda: open_page_fourth(window))
+    button_continue = Button(master=window_frame, text="continue", font=('Helvetica', 12),
+                             command=lambda: open_next_page(window, 3))
     button_continue.place(x=215, y=400)
 
     window_frame.place(x=0, y=80)
 
 
-def open_page_fourth(window):
-    entry_text = get_entry_text(window)
-    if entry_text == '' or entry_text is None:
-        print("Stay as you are")
-        return
-
-    if entry_text.isdigit() == False:
-        print("Only numbers!!!")
-        return
-
-    if int(entry_text) > 100 or int(entry_text) < 1 :
-        print("Only numbers from 1 to 100 !!!")
-        return
-
-    clear_frame_from_window(window)
-
+def open_fourth_page(window):
     window_frame = Frame(master=window, width=500, height=500)
 
     label_of_winner = Label(master=window, text="The winner is:", font=('Helvetica', 24))
@@ -128,7 +186,7 @@ def open_page_fourth(window):
     label_of_player_name = Label(master=window, text="Natan!", font=('Helvetica', 24))
     label_of_player_name.place(x=185, y=260)
 
-    button_exit = Button(master=window, text="Exit", font=('Helvetica', 12), command=lambda: close_window(window))
+    button_exit = Button(master=window, text="Exit", font=('Helvetica', 12), command=lambda: open_next_page(window, 4))
     button_exit.place(x=225, y=480)
 
     window_frame.place(x=0, y=60)

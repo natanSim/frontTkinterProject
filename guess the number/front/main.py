@@ -21,3 +21,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# TODO: Create validation and rules to move to the next page
+# TODO: Add to GitHub
+# TODO: Ask Hai to Continue
+# TODO: Integrate your game with UI
+

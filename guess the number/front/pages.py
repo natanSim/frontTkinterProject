@@ -1,5 +1,6 @@
 from tkinter import *
 from random import randint
+from tkinter import messagebox
 
 
 def get_entry_text(window):
@@ -35,6 +36,10 @@ def is_contains_number(text):
     return False
 
 
+def open_pop_up_window(text):
+    messagebox.showerror("ERROR", text)
+
+
 def is_ready_to_next_page(window, current_window_index):
 
     if current_window_index == 1:
@@ -42,15 +47,16 @@ def is_ready_to_next_page(window, current_window_index):
         entry_text = get_entry_text(window)
 
         if is_entry_empty(entry_text):
-            print("Stay as you are")
+            open_pop_up_window("Field is empty")
             return False
 
         if not entry_text.isdigit():
-            print("Only numbers!!!")
+            open_pop_up_window("Only numbers!!!")
+
             return False
 
         if not is_number_in_range(int(entry_text), 1, 5):
-            print("Up to 5 players are allowed")
+            open_pop_up_window("Up to 5 players are allowed")
             return False
 
         return True
@@ -59,11 +65,11 @@ def is_ready_to_next_page(window, current_window_index):
         entry_text = get_entry_text(window)
 
         if is_entry_empty(entry_text):
-            print("Stay as you are")
+            open_pop_up_window("Stay as you are")
             return False
 
         if is_contains_number(entry_text):
-            print("Enter a username without numbers")
+            open_pop_up_window("Enter a username without numbers")
             return False
 
         return True
@@ -72,17 +78,17 @@ def is_ready_to_next_page(window, current_window_index):
         entry_text = get_entry_text(window)
 
         if is_entry_empty(entry_text):
-            print("Stay as you are")
+            open_pop_up_window("Stay as you are")
             return False
 
         if not entry_text.isdigit():
-            print("Only numbers!!!")
+            open_pop_up_window("Only numbers!!!")
+
             return False
 
-        if not is_number_in_range(int(entry_text), 1, 100):
-            print("Up to 5 players are allowed")
+        if not is_number_in_range(int(entry_text), 1, 100) or not get_random_number():
+            open_pop_up_window("only numbers from 1 to 100!")
             return False
-
         return True
 
     elif current_window_index == 4:
@@ -90,6 +96,18 @@ def is_ready_to_next_page(window, current_window_index):
 
     else:
         return f"Natan fix that problem there is no exist page here"
+
+
+def is_all_players_played(wanted_amount_of_players, current_amount_of_players):
+    return wanted_amount_of_players == current_amount_of_players
+
+
+def get_amount_of_players(program_data):
+    return program_data["amount_of_players"]
+
+
+def get_current_amount_of_players(program_data):
+    return len(program_data.keys()) - 1
 
 
 def open_next_page(window, current_window_index, program_data, player_data=None):
@@ -110,29 +128,26 @@ def open_next_page(window, current_window_index, program_data, player_data=None)
         player_data['guess'] = guess
         player_data['amount_of_guesses'] += 1
 
-        print(f'guess = {guess}')
-        print(f'player_data = {player_data}')
+        if guess != player_data['random_number']:
+            open_pop_up_window("Wrong number try again!")
 
-        if guess == player_data['random_number']:
-            program_data[player_data['name']] = player_data
-            print(f'program_data = {program_data}')
+            clear_frame_from_window(window)
+            open_third_page(window, program_data, player_data)
+            return
 
-            if program_data["amount_of_players"] == len(program_data.keys()) - 1:
-                # print(f"End of game: {list(program_data['name'])}")
-                get_names_list(program_data)
-                group_players_with_same_guesses(program_data)
-                sort_users_data(program_data)
-                player_places = get_winner(program_data)
-                get_player_winner = list(player_places.values())
-                # TODO: Get winner
+        program_data[player_data['name']] = player_data
+        amount_of_players = get_amount_of_players(program_data)
+        current_amount_of_players = get_current_amount_of_players(program_data)
 
-                clear_frame_from_window(window)
-                open_fourth_page(window, program_data, get_player_winner)
+        if not is_all_players_played(amount_of_players, current_amount_of_players):
+            clear_frame_from_window(window)
+            open_second_page(window, program_data)
+            return
 
-            else:
-                clear_frame_from_window(window)
-                # TODO: change player data of third page inside frame
-                open_second_page(window, program_data)
+        player_places = get_winner(program_data)
+        get_player_winner = list(player_places.values())
+        clear_frame_from_window(window)
+        open_fourth_page(window, program_data, get_player_winner)
 
     elif current_window_index == 4 and is_ready_to_next_page(window, 4):
         clear_frame_from_window(window)
@@ -158,7 +173,7 @@ def get_names_list(program_data):
     return names_list
 
 
-def group_players_with_same_guesses(program_data):
+def get_group_players_with_same_guesses(program_data):
     result = {}
     names_list = get_names_list(program_data)
 
@@ -168,8 +183,8 @@ def group_players_with_same_guesses(program_data):
             continue
 
         if isinstance(result[program_data[player]['amount_of_guesses']], str):
-            result[program_data[player]['amount_of_guesses']] = [result[program_data[player]['amount_of_guesses']],
-                                                                 player]
+            result[program_data[player]['amount_of_guesses']] = [result[program_data[player]['amount_of_guesses']], player]
+
         elif isinstance(result[program_data[player]['amount_of_guesses']], list):
             result[program_data[player]['amount_of_guesses']].append(player)
 
@@ -195,11 +210,9 @@ def sort_users_data(program_data):
 
 def get_winner(program_data):
 
-    players_with_same_guesses_group = group_players_with_same_guesses(program_data)
+    players_with_same_guesses_group = get_group_players_with_same_guesses(program_data)
     sort_players_place = sort_users_data(players_with_same_guesses_group)
-
-    print('')
-    print(f'end_of_the+game: {sort_players_place}  ')
+    print(f'end_of_the game: {sort_players_place}  ')
     return sort_players_place
 # endregion back
 

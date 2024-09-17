@@ -3,6 +3,38 @@ from random import randint
 from tkinter import messagebox
 
 
+class Player:
+    """
+
+    """
+    def __init__(self, name, random_number, player_number):
+        self.name = name
+        self.random_number = random_number
+        self.player_number = player_number
+
+        self.amount_of_guesses = 0
+        self.guesses_history = []
+        print(self.random_number)
+
+    def get_name(self):
+        return self.name
+
+    def get_amount_of_guesses(self):
+        return self.amount_of_guesses
+
+    def get_player_number(self):
+        return self.player_number
+
+    def is_guess_correct(self, guess):
+        return self.random_number == guess
+
+    def increment_user_guesses(self):
+        self.amount_of_guesses += 1
+
+    def update_guess_history(self, new_guess):
+        self.guesses_history.append(new_guess)
+
+
 def get_entry_text(window):
     for element in window.winfo_children():
         if type(element) is Frame:
@@ -117,25 +149,26 @@ def open_next_page(window, current_window_index, program_data, player_data=None)
         open_second_page(window, program_data)
 
     elif current_window_index == 2 and is_ready_to_next_page(window, 2):
-        random_number = get_random_number()
         name = get_entry_text(window)
+        random_number = get_random_number()
+        player_number = len(program_data.keys())
         clear_frame_from_window(window)
-        new_player_data = {'name': name, 'amount_of_guesses': 0, 'guess': None, "random_number": random_number}
-        open_third_page(window, program_data, new_player_data)
+
+        new_player = Player(name, random_number, player_number)
+        open_third_page(window, program_data, new_player)
 
     elif current_window_index == 3 and is_ready_to_next_page(window, 3):
         guess = int(get_entry_text(window))
-        player_data['guess'] = guess
-        player_data['amount_of_guesses'] += 1
+        player_data.increment_user_guesses()
+        player_data.update_guess_history(guess)
 
-        if guess != player_data['random_number']:
+        if not player_data.is_guess_correct(guess):
             open_pop_up_window("Wrong number try again!")
-
             clear_frame_from_window(window)
             open_third_page(window, program_data, player_data)
             return
 
-        program_data[player_data['name']] = player_data
+        program_data[player_data.get_name()] = player_data
         amount_of_players = get_amount_of_players(program_data)
         current_amount_of_players = get_current_amount_of_players(program_data)
 
@@ -178,15 +211,17 @@ def get_group_players_with_same_guesses(program_data):
     names_list = get_names_list(program_data)
 
     for player in names_list:
-        if program_data[player]['amount_of_guesses'] not in result.keys():
-            result[program_data[player]['amount_of_guesses']] = player
+
+        if program_data[player].get_amount_of_guesses() not in result.keys():
+            result[program_data[player].get_amount_of_guesses()] = player
             continue
 
-        if isinstance(result[program_data[player]['amount_of_guesses']], str):
-            result[program_data[player]['amount_of_guesses']] = [result[program_data[player]['amount_of_guesses']], player]
+        if isinstance(result[program_data[player].get_amount_of_guesses()], str):
+            result[program_data[player].get_amount_of_guesses()] =\
+                [result[program_data[player].get_amount_of_guesses()], player]
 
-        elif isinstance(result[program_data[player]['amount_of_guesses']], list):
-            result[program_data[player]['amount_of_guesses']].append(player)
+        elif isinstance(result[program_data[player].get_amount_of_guesses()], list):
+            result[program_data[player].get_amount_of_guesses()].append(player)
 
     # print(list(result.values()))
     return result
@@ -253,14 +288,14 @@ def open_third_page(window, program_data, new_player_data):
     window_frame = Frame(master=window, width=500, height=500)
 
     # region player details
-    label_name = Label(master=window_frame, text=f"Name: {new_player_data['name']}", font=('Helvetica', 12))
+    label_name = Label(master=window_frame, text=f"Name: {new_player_data.get_name()}", font=('Helvetica', 12))
     label_name.place(x=30, y=20)
 
-    label_player_number = Label(master=window_frame, text=f"Player number:{new_player_data['random_number']}",
+    label_player_number = Label(master=window_frame, text=f"Player number:{new_player_data.get_player_number()}",
                                 font=('Helvetica', 12))
     label_player_number.place(x=190, y=20)
 
-    label_amount_of_guesses = Label(master=window_frame, text=f"Guesses: {new_player_data['amount_of_guesses']}",
+    label_amount_of_guesses = Label(master=window_frame, text=f"Guesses: {new_player_data.get_amount_of_guesses()}",
                                     font=('Helvetica', 12))
     label_amount_of_guesses.place(x=370, y=20)
     # endregion player details
@@ -296,5 +331,3 @@ def open_fourth_page(window, program_data, winner):
 
 def close_window(window):
     window.destroy()
-
-

@@ -1,6 +1,56 @@
 from random import randint
 
 
+class Player:
+    def __init__(self, name, random_number, player_number):
+        self.name = name
+        self.random_number = random_number
+        self.player_number = player_number
+
+        self.clue_mode_state = False
+        self.amount_of_guesses = 0
+        self.guesses_history = []
+        print(f'self.random_number = {self.random_number}')
+
+    def get_name(self):
+        return self.name
+
+    def get_player_number(self):
+        return self.player_number
+
+    def get_amount_of_guesses(self):
+        return self.amount_of_guesses
+
+    def is_guess_correct(self, guess):
+        return self.random_number == guess
+
+    def increment_user_guesses(self):
+        self.amount_of_guesses += 1
+
+    def update_guess_history(self, new_guess):
+        self.guesses_history.append(new_guess)
+
+    def get_clue_mode_state(self):
+        return self.clue_mode_state
+
+    def set_clue_mode_state(self, state):
+        self.clue_mode_state = state
+
+    def show_player_data(self):
+        print(f"""
+        name - {self.get_name()}
+        player_number - {self.get_player_number()}
+        amount_of_guesses - {self.get_amount_of_guesses()}
+        """)
+
+    def get_player_data(self):
+        return f"""
+        name - {self.get_name()}
+        player_number - {self.get_player_number()}
+        amount_of_guesses - {self.get_amount_of_guesses()}
+        """
+
+
 def show_welcome_message_to_user():
     """
     - without parameters
@@ -45,7 +95,7 @@ def get_player_data(user_name, number_to_guess):
     return player_data
 
 
-def add_player_data_to_table(table, player_data):
+def add_player_data_to_table(table, player_data: Player):
     """
     :param table:
     :param player_data:
@@ -54,20 +104,22 @@ def add_player_data_to_table(table, player_data):
     The function adding player data to table
     """
 
-    print(f'table = {table}')
-    table[player_data['name']] = player_data
+    table[player_data.get_name()] = player_data
     return table
 
 
-def show_player_data(user_guesses):
+def show_player_data(player_data: dict):
     """
     :param user_guesses:
     :return: nothing
     The function prints the user data after his game
     """
-    for key, value in user_guesses.items():
+    for key, value in player_data.items():
         print(f'{key} - amount of guesses: {value}\n')
 
+# class - Main object
+# instance - Specific copy of class
+# methods - function of class/instance
 
 def is_user_wants_clue():
     """
@@ -100,16 +152,6 @@ def show_clue_for_user(user_guess, correct_number):
         print('Clue: Lower')
 
 
-def is_user_guess(user_guess, correct_number):
-    """
-    :param user_guess:
-    :param correct_number:
-    :return: user_guess == correct_number
-    The function checking if is user guess correct
-    """
-    return user_guess == correct_number
-
-
 def get_random_number():
     """
     :return: randint(1, 100)
@@ -118,32 +160,32 @@ def get_random_number():
     return randint(1, 100)
 
 
-def game(correct_number):
+def game(player_data: Player):
     """
+    :param Player:
     :param correct_number:
     :return: counter
     The function checks the number of guesses by the user
     """
-    counter = 0
-    clue_mode_flag = False
 
     while True:
         user_guess = get_input_from_user('int', 'Insert number from 1 - 100: ')
-        counter += 1
+        player_data.increment_user_guesses()
 
-        if is_user_guess(user_guess, correct_number) == True:
-            if clue_mode_flag == True:
-                counter += 1
+        if player_data.is_guess_correct(user_guess):
+            if player_data.get_clue_mode_state() is True:
+                player_data.increment_user_guesses()  # Because on clue mode state each guess is like 2 guesses
             break
 
-        if clue_mode_flag == False and counter == 2:
+        if player_data.get_clue_mode_state() is False and player_data.get_amount_of_guesses() == 2:
             clue_mode_flag = is_user_wants_clue()
+            player_data.set_clue_mode_state(clue_mode_flag)
 
-        elif clue_mode_flag == True:
-            show_clue_for_user(user_guess, correct_number)
-            counter += 1
+        elif player_data.get_clue_mode_state() is True:
+            show_clue_for_user(user_guess, player_data.get_amount_of_guesses())
+            player_data.increment_user_guesses()
 
-    return counter
+    return player_data
 
 
 def get_names_list(users_data):
@@ -155,27 +197,38 @@ def get_names_list(users_data):
     return list(users_data.keys())
 
 
-def group_players_with_same_guesses(data_base):
+def group_players_with_same_guesses(data_base: Player):
     """
+    :param player_data:
     :param data_base:
     :return: result
     The function put players with the same guesses
     in the same group
     """
-    result = {}
-    names_list = get_names_list(data_base)
 
-    for player in names_list:
-        # print(f'result = {result}')
-        if data_base[player]['amount_of_guesses'] not in result.keys():
-            result[data_base[player]['amount_of_guesses']] = player
+    result = {}
+    # names_list = get_names_list(data_base)
+
+    for player_name in data_base:
+
+        if data_base[player_name].get_amount_of_guesses() not in result.keys():
+            result[data_base[player_name].get_amount_of_guesses()] = player_name
             continue
 
-        if isinstance(result[data_base[player]['amount_of_guesses']], str):
-            result[data_base[player]['amount_of_guesses']] = [result[data_base[player]['amount_of_guesses']], player]
-        elif isinstance(result[data_base[player]['amount_of_guesses']], list):
-            result[data_base[player]['amount_of_guesses']].append(player)
+        if isinstance(result[data_base[player_name].get_amount_of_guesses()], str):
+            result[data_base[player_name].get_amount_of_guesses()] = [result[data_base[player_name].get_amount_of_guesses()], player_name]
 
+        elif isinstance(result[data_base[player_name].get_amount_of_guesses()], list):
+            result[data_base[player_name].get_amount_of_guesses()].append(player_name)
+
+        # if data_base[player]['amount_of_guesses'] not in result.keys():
+        #     result[data_base[player]['amount_of_guesses']] = player
+        #     continue
+        #
+        # if isinstance(result[data_base[player]['amount_of_guesses']], str):
+        #     result[data_base[player]['amount_of_guesses']] = [result[data_base[player]['amount_of_guesses']], player]
+        # elif isinstance(result[data_base[player]['amount_of_guesses']], list):
+        #     result[data_base[player]['amount_of_guesses']].append(player)
     # print(list(result.values()))
     return result
 
@@ -202,6 +255,7 @@ def sort_users_data(users_data):
 
 def get_winner(users_data):
     """
+    :param player_data:
     :param users_data:
     :return: sort_players_place
     The function working like mini main that finding the guesses and places of all the user
@@ -224,8 +278,8 @@ def show_players_table(users_data):
 
     print('    name:          |       guesses:       |     place:    ')
 
-    for key, value in users_data.items():
-        print(f'    {value}         |        {key}             |       {place}')
+    for name, guesses in users_data.items():
+        print(f'    {name}         |        {guesses}             |       {place}')
 
         place += 1
 
